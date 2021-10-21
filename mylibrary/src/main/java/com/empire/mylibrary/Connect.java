@@ -1,21 +1,22 @@
 package com.empire.mylibrary;
 
 import android.content.Context;
+import android.os.StrictMode;
 import android.widget.Toast;
-
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Connect {
 
-    public String resp = "";
+
+    public Connect() {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+    }
 
     public void toast(Context mContext, String msg) {
         Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
@@ -33,6 +34,10 @@ public class Connect {
 
     public String getDashboardData_R(Context mContext, String user_id, String route, String version_code, String token) {
 
+        String resp = "";
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         Api api = ApiClient.getClient().create(Api.class);
         Map<String, String> params = new HashMap<>();
 
@@ -40,26 +45,16 @@ public class Connect {
         params.put("route", route);
         params.put("ER_app_version", version_code);
 
-        api.getDashboardData(params, "Bearer " + token).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+        try {
+            Response<ResponseBody> response = api.getDashboardData(params, "Bearer " + token).execute();
 
-                if (response.isSuccessful()) {
-                    try {
-                        String res = response.body().string();
-
-                        resp = res;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+            if (response.isSuccessful()) {
+                resp = response.body().string();
             }
+        } catch (Exception e) {
+            resp = e.getMessage();
+        }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                resp = "";
-            }
-        });
         return resp;
     }
 
