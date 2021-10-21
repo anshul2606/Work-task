@@ -1,0 +1,3 @@
+rootProject.name = "MyconnectLib"
+include ':app'
+include ':mylibrary'
